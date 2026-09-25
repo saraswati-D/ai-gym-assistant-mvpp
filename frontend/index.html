@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fitness Assistant — MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1d2026;
+    --panel-2: #23262e;
+    --line: #2d313a;
+    --text: #f2f3f0;
+    --muted: #9298a3;
+    --accent: #c8ff4d;
+    --accent-dim: #9fce34;
+    --warn: #ff8a5c;
+    --risk-low: #7fe38c;
+    --risk-medium: #ffcf5c;
+    --risk-high: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  header.top .display {
+    font-size: 40px;
+    line-height: 1;
+  }
+  header.top .display span { color: var(--accent); }
+  header.top .tag {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px;
+  }
+  .panel + .panel { margin-top: 24px; }
+  .panel h2 {
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 12px 0 4px;
+  }
+  input, select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 9px 10px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  input:focus, select:focus, button:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0f1012;
+    padding: 11px 16px;
+    width: 100%;
+    margin-top: 18px;
+  }
+  .btn-primary:hover { background: var(--accent-dim); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 9px 14px;
+  }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 12px;
+  }
+  .stat .num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .stat .lbl {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .macro-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 6px 0 4px;
+  }
+  .macro-bar span { display: block; height: 100%; }
+  .macro-legend {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+  ul.clean { margin: 0; padding-left: 18px; font-size: 14px; }
+  ul.clean li { margin-bottom: 6px; }
+  .risk-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .risk-low { background: rgba(127,227,140,0.15); color: var(--risk-low); }
+  .risk-medium { background: rgba(255,207,92,0.15); color: var(--risk-medium); }
+  .risk-high { background: rgba(255,107,107,0.15); color: var(--risk-high); }
+  .nudge {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--panel-2);
+    border-left: 3px solid var(--warn);
+    border-radius: 2px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .chat-log {
+    height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-right: 4px;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #0f1012;
+  }
+  .msg.bot {
+    align-self: flex-start;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+  }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input-row input { flex: 1; }
+  .empty-note {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  .footer-note {
+    margin-top: 32px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="display">FIT<span>/</span>ASSIST</div>
+    <div class="tag">AI dietician + habit tracker — MVP</div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: Profile form -->
+    <div>
+      <div class="panel">
+        <h2>Your profile</h2>
+        <label for="name">Name</label>
+        <input id="name" value="Alex Kumar" />
+
+        <div class="row2">
+          <div>
+            <label for="age">Age</label>
+            <input id="age" type="number" value="28" />
+          </div>
+          <div>
+            <label for="sex">Sex</label>
+            <select id="sex">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label for="height">Height (cm)</label>
+            <input id="height" type="number" value="175" />
+          </div>
+          <div>
+            <label for="weight">Weight (kg)</label>
+            <input id="weight" type="number" value="78" />
+          </div>
+        </div>
+
+        <label for="goal">Goal</label>
+        <select id="goal">
+          <option value="cut">Lose fat (cut)</option>
+          <option value="maintain">Maintain</option>
+          <option value="bulk">Build muscle (bulk)</option>
+        </select>
+
+        <label for="activity">Activity level</label>
+        <select id="activity">
+          <option value="sedentary">Sedentary (desk job)</option>
+          <option value="light">Light (1-3x/week)</option>
+          <option value="moderate" selected>Moderate (3-5x/week)</option>
+          <option value="active">Active (6-7x/week)</option>
+          <option value="very_active">Very active (physical job)</option>
+        </select>
+
+        <label for="sessions">Weekly workout target</label>
+        <input id="sessions" type="number" value="4" />
+
+        <button class="btn-primary" id="createBtn">Generate my plan</button>
+      </div>
+
+      <div class="panel" id="habitPanel" style="display:none;">
+        <h2>Habit tracker</h2>
+        <div id="habitBody"></div>
+        <button class="btn-secondary" id="logBtn" style="margin-top:14px; width:100%;">Log today's workout</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Plan + Chat -->
+    <div>
+      <div class="panel" id="planPanel">
+        <h2>Diet plan</h2>
+        <p class="empty-note">Fill in your profile and generate a plan to see results here.</p>
+      </div>
+
+      <div class="panel" id="chatPanel" style="display:none;">
+        <h2>Ask your coach</h2>
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input-row">
+          <input id="chatInput" placeholder="e.g. what should I eat today?" />
+          <button class="btn-secondary" id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    Backend: FastAPI at <code>http://localhost:8000</code>. Run <code>uvicorn app.main:app --reload</code> inside <code>/backend</code> before using this page.
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:8000";
+let userId = null;
+
+const $ = (id) => document.getElementById(id);
+
+$('createBtn').addEventListener('click', async () => {
+  const payload = {
+    name: $('name').value,
+    age: parseInt($('age').value),
+    sex: $('sex').value,
+    height_cm: parseFloat($('height').value),
+    weight_kg: parseFloat($('weight').value),
+    goal: $('goal').value,
+    activity_level: $('activity').value,
+    expected_weekly_sessions: parseInt($('sessions').value),
+  };
+
+  $('createBtn').textContent = 'Working...';
+  try {
+    const res = await fetch(`${API}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Could not create user');
+    const user = await res.json();
+    userId = user.id;
+
+    await loadDietPlan();
+    await loadHabitStatus();
+    $('habitPanel').style.display = 'block';
+    $('chatPanel').style.display = 'block';
+    resetChat();
+  } catch (err) {
+    alert('Error: ' + err.message + '\n\nIs the backend running at ' + API + '?');
+  } finally {
+    $('createBtn').textContent = 'Generate my plan';
+  }
+});
+
+async function loadDietPlan() {
+  const res = await fetch(`${API}/users/${userId}/diet-plan`);
+  const plan = await res.json();
+
+  const totalMacroCals = plan.macros.protein_g * 4 + plan.macros.carbs_g * 4 + plan.macros.fat_g * 9;
+  const pPct = (plan.macros.protein_g * 4 / totalMacroCals * 100).toFixed(0);
+  const cPct = (plan.macros.carbs_g * 4 / totalMacroCals * 100).toFixed(0);
+  const fPct = (plan.macros.fat_g * 9 / totalMacroCals * 100).toFixed(0);
+
+  $('planPanel').innerHTML = `
+    <h2>Diet plan</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="num">${plan.bmi}</div><div class="lbl">BMI — ${plan.bmi_category}</div></div>
+      <div class="stat"><div class="num">${plan.bmr}</div><div class="lbl">BMR (kcal)</div></div>
+      <div class="stat"><div class="num">${plan.tdee}</div><div class="lbl">Maintenance (kcal)</div></div>
+      <div class="stat"><div class="num">${plan.target_calories}</div><div class="lbl">Daily target (kcal)</div></div>
+    </div>
+
+    <div class="macro-bar">
+      <span style="width:${pPct}%; background: var(--accent);"></span>
+      <span style="width:${cPct}%; background: var(--warn);"></span>
+      <span style="width:${fPct}%; background: #6c8bff;"></span>
+    </div>
+    <div class="macro-legend">
+      <span><span class="dot" style="background:var(--accent)"></span>Protein ${plan.macros.protein_g}g</span>
+      <span><span class="dot" style="background:var(--warn)"></span>Carbs ${plan.macros.carbs_g}g</span>
+      <span><span class="dot" style="background:#6c8bff"></span>Fat ${plan.macros.fat_g}g</span>
+    </div>
+
+    <h3 style="font-size:17px; margin-bottom:6px;">Sample meals</h3>
+    <ul class="clean">${plan.meal_suggestions.map(m => `<li>${m}</li>`).join('')}</ul>
+
+    <h3 style="font-size:17px; margin:14px 0 6px;">Grocery list</h3>
+    <ul class="clean">${plan.grocery_list.map(g => `<li>${g}</li>`).join('')}</ul>
+  `;
+}
+
+async function loadHabitStatus() {
+  const res = await fetch(`${API}/users/${userId}/habit-status`);
+  const status = await res.json();
+
+  $('habitBody').innerHTML = `
+    <div class="stat-row" style="grid-template-columns: 1fr 1fr;">
+      <div class="stat"><div class="num">${status.sessions_last_7_days}/${status.expected_weekly_sessions}</div><div class="lbl">Sessions this week</div></div>
+      <div class="stat"><div class="num">${status.total_sessions_logged}</div><div class="lbl">Total logged</div></div>
+    </div>
+    <span class="risk-badge risk-${status.skip_risk}">${status.skip_risk} skip risk</span>
+    <div class="nudge">${status.nudge_message}</div>
+  `;
+}
+
+$('logBtn').addEventListener('click', async () => {
+  if (!userId) return;
+  await fetch(`${API}/workouts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, note: 'logged from dashboard' }),
+  });
+  await loadHabitStatus();
+});
+
+function resetChat() {
+  $('chatLog').innerHTML = '';
+  addMsg('bot', "Hi! I'm your coach. Ask me about your calories, macros, meals, groceries, or workout streak.");
+}
+
+function addMsg(sender, text) {
+  const div = document.createElement('div');
+  div.className = `msg ${sender}`;
+  div.textContent = text;
+  $('chatLog').appendChild(div);
+  $('chatLog').scrollTop = $('chatLog').scrollHeight;
+}
+
+async function sendChat() {
+  const text = $('chatInput').value.trim();
+  if (!text || !userId) return;
+  addMsg('user', text);
+  $('chatInput').value = '';
+
+  const res = await fetch(`${API}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, message: text }),
+  });
+  const data = await res.json();
+  addMsg('bot', data.reply);
+}
+
+$('sendBtn').addEventListener('click', sendChat);
+$('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+</script>
+</body>
+</html>
